@@ -37,5 +37,36 @@ namespace AdventOfCode
 
             Console.WriteLine("Day 2 Part 1: Depth ({0}) * Horizontal Position ({1}) = {2}", depth, horizontalPos, horizontalPos * depth);
         }
+
+        public static void Part2()
+        {
+            List<string> lines = File.ReadAllLines(@"Day2/input.txt").ToList();
+            int horizontalPos = 0;
+            int depth = 0;
+            int aim = 0;
+            foreach (string line in lines)
+            {
+                string[] values = line.Split(' ');
+                string direction = values[0];
+                int distance = Int32.Parse(values[1]);
+                switch (direction)
+                {
+                    case "forward":
+                        horizontalPos += distance;
+                        depth += aim * distance;
+                        break;
+
+                    case "up":
+                        aim -= distance;
+                        break;
+
+                    case "down":
+                        aim += distance;
+                        break;
+                }
+            }
+
+            Console.WriteLine("Day 2 Part 2: Depth ({0}) * Horizontal Position ({1}) = {2}", depth, horizontalPos, horizontalPos * depth);
+        }
     }
 }
