@@ -32,14 +32,14 @@ namespace AdventOfCode
             float half = lines.Count / 2;
             for (int i = 0; i < oneCount.Count; ++i)
             {
-                int valToAdd = (int)Math.Pow(2, (oneCount.Count - i - 1));
+                int valToAdd = 1 << oneCount.Count - i - 1;
                 if (oneCount[i] > half)
                 {
-                    gamma += valToAdd;
+                    gamma |= valToAdd;
                 }
                 else
                 {
-                    epsilon += valToAdd;
+                    epsilon |= valToAdd;
                 }
             }
 
