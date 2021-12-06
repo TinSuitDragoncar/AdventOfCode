@@ -11,7 +11,7 @@ namespace AdventOfCode
     {
         public static void Part1()
         {
-            List<string> lines = File.ReadAllLines(@"Day4/test.txt").ToList();
+            List<string> lines = File.ReadAllLines(@"Day4/input.txt").ToList();
 
             List<int> draws = lines.First().Split(',').Select(x => Int32.Parse(x)).ToList();
             lines.RemoveAt(0);
@@ -51,45 +51,48 @@ namespace AdventOfCode
             Console.WriteLine("Day 4 Part 1: Table Index {0} wins with a score of {1} * {2} = {3}", winningIndex, sum, lastCalled, lastCalled * sum);
         }
 
-        private static bool HasATableWon(List<int> tables, HashSet<int> drawnNumbers, out int winningIndex)
+        private static bool HasATableWon(List<int> tables, HashSet<int> drawnNumbers, out int tableIndex)
         {
-            for (int i = 0; i < tables.Count; i += 25)
+            int rowCount = 0;
+            int columnCount = 0;
+            for (int i = 0; i < tables.Count; ++i)
             {
-                winningIndex = i / 25;
-                // Check rows
-                for (int j = i; j < i + 25; j += 25)
+                tableIndex = i / 25;
+                int columnIndex = i % 5;
+                int rowIndex = (i % 25) / 5;
+
+                if (columnIndex == 0)
                 {
-                    for (int k = j; k < j + 5; ++k)
-                    {
-                        if (!drawnNumbers.Contains(tables[k]))
-                        {
-                            break;
-                        }
-                        else if (k == j + 4)
-                        {
-                            return true;
-                        }
-                    }
+                    rowCount = 5;
                 }
 
-                // Check columns
-                for (int j = i; j < i + 5; ++j)
+                if (rowIndex == 0 &&
+                    columnIndex == 0)
                 {
-                    for (int k = j; k < i + 25; k += 5)
+                    columnCount = 0b11111;
+                }
+
+                if (drawnNumbers.Contains(tables[i]))
+                {
+                    --rowCount;
+                    
+                    if (rowCount == 0)
                     {
-                        if (!drawnNumbers.Contains(tables[k]))
-                        {
-                            break;
-                        }
-                        else if (k == k + 20)
-                        {
-                            return true;
-                        }
+                        return true;
+                    }
+                }
+                else
+                {
+                    columnCount &= ~(1 << columnIndex);
+                    if (rowIndex == 4 &&
+                        (columnCount & (1 << columnIndex)) > 0)
+                    {
+                        return true;
                     }
                 }
             }
 
-            winningIndex = -1;
+            tableIndex = -1;
             return false;
         }
     }
