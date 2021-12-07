@@ -14,7 +14,7 @@ namespace AdventOfCode
             List<int> initialState = File.ReadAllLines(@"Day6/test.txt").First().Split(',').Select(x => Int32.Parse(x)).ToList();
 
             int count = initialState.Count;
-            const int days = 18;
+            const int days = 256;
             foreach (int state in initialState)
             {
                 int dayOffset = 8 - state;
@@ -22,7 +22,7 @@ namespace AdventOfCode
                 count += GetProduction(days + dayOffset);
             }
 
-            Console.WriteLine("Day 6 Part 1: Total number of fish after {0} days is {1} ", count);
+            Console.WriteLine("Day 6 Part 1: Total number of fish after {0} days is {1} ", days, count);
         }
         
         private static int GetProduction(int days)
