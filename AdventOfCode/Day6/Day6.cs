@@ -9,40 +9,53 @@ namespace AdventOfCode
 {
     class Day6
     {
+        // This version is very slow for large numbers of fish
         public static void Part1()
         {
-            List<int> initialState = File.ReadAllLines(@"Day6/test.txt").First().Split(',').Select(x => Int32.Parse(x)).ToList();
+            int days = 80;
+            ulong pop = CalculatePopulation(days);
 
-            int count = initialState.Count;
-            const int days = 256;
-            foreach (int state in initialState)
-            {
-                int dayOffset = 8 - state;
-
-                count += GetProduction(days + dayOffset);
-            }
-
-            Console.WriteLine("Day 6 Part 1: Total number of fish after {0} days is {1} ", days, count);
+            Console.WriteLine("Day 6 Part 1: Total number of fish after {0} days is {1} ", days, pop);
         }
-        
-        private static int GetProduction(int days)
+
+        public static void Part2()
         {
-            const int initialLifespan = 9;
-            const int defaultLifespan = 7;
-            if (initialLifespan > days)
+            int days = 256;
+            ulong pop = CalculatePopulation(days);
+
+            Console.WriteLine("Day 6 Part 2: Total number of fish after {0} days is {1} ", days, pop);
+        }
+
+        private static ulong CalculatePopulation(int days)
+        {
+            List<int> initialState = File.ReadAllLines(@"Day6/input.txt").First().Split(',').Select(x => Int32.Parse(x)).ToList();
+
+            ulong[] fishLifespan = new ulong[9];
+
+            foreach(int t in initialState)
             {
-                return 0;
+                ++fishLifespan[t];
             }
-            int localProduction = 1;
-            days -= initialLifespan;
-            localProduction += days / defaultLifespan;
-            int totalProduction = GetProduction(days) + localProduction;
-            for (int i = 0; i < localProduction - 1; ++i)
+
+            for(int i = 0; i < days; ++i)
             {
-                days -= defaultLifespan;
-                totalProduction += GetProduction(days);
+                ulong temp = fishLifespan[0];
+
+                for (int j = 0; j < 8; ++j)
+                {
+                    fishLifespan[j] = fishLifespan[j + 1];
+                }
+
+                fishLifespan[8] = temp;
+                fishLifespan[6] += temp;
             }
-            return totalProduction;
+
+            ulong sum = 0;
+            foreach(ulong population in fishLifespan)
+            {
+                sum += population;
+            }
+            return sum;
         }
     }
 }
