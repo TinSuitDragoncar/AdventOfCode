@@ -9,7 +9,6 @@ namespace AdventOfCode
 {
     class Day6
     {
-        // This version is very slow for large numbers of fish
         public static void Part1()
         {
             int days = 80;
