@@ -38,15 +38,15 @@ namespace AdventOfCode
 
             for(int i = 0; i < days; ++i)
             {
-                ulong temp = fishLifespan[0];
+                ulong duplicatingFish = fishLifespan[0];
 
                 for (int j = 0; j < 8; ++j)
                 {
                     fishLifespan[j] = fishLifespan[j + 1];
                 }
 
-                fishLifespan[8] = temp;
-                fishLifespan[6] += temp;
+                fishLifespan[8] = duplicatingFish;
+                fishLifespan[6] += duplicatingFish;
             }
 
             ulong sum = 0;
