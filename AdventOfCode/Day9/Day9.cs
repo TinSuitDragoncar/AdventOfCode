@@ -130,7 +130,6 @@ namespace AdventOfCode
             HashSet<int> visitedIndices = new HashSet<int>();
             List<int> basins = new List<int>();
 
-            int sum = 0;
             List<int> indicies = GetBasinIndices();
             foreach (int i in indicies)
             {
@@ -154,7 +153,7 @@ namespace AdventOfCode
 
             int basinCount = 1;
 
-            if (thisValue > prevValue && thisValue != 9 && !visitedIndices.Contains(i))
+            if (thisValue > prevValue && thisValue < 9 && !visitedIndices.Contains(i))
             {
                 visitedIndices.Add(i);
 
@@ -168,7 +167,6 @@ namespace AdventOfCode
                 }
                 if (rowIndex > 0)
                 {
-
                     basinCount += GetBasinSize(i - width, thisValue, input, visitedIndices, width, height);
                 }
                 if (rowIndex < height - 1)
