@@ -32,6 +32,29 @@ namespace AdventOfCode
             Console.WriteLine("Day 11 Part 1: {0}", flashCount);
         }
 
+        public static void Part2()
+        {
+            List<string> lines = File.ReadAllLines(@"Day11/input.txt").ToList();
+
+            int width = lines.First().Length;
+
+            List<int> input = lines.SelectMany(x => x.ToArray()).Select(x => Int32.Parse(x.ToString())).ToList();
+
+            int steps = 0;
+            HashSet<int> flashedIndices = new HashSet<int>();
+            while (flashedIndices.Count != input.Count)
+            {
+                ++steps;
+                flashedIndices.Clear();
+                for (int j = 0; j < input.Count; ++j)
+                {
+                    Step(input, flashedIndices, j, width);
+                }
+            }
+
+            Console.WriteLine("Day 11 Part 1: {0}", steps);
+        }
+
         private static int Step(List<int> input, HashSet<int> flashedIndices, int Idx, int width)
         {
             if (input[Idx] == 0 && flashedIndices.Contains(Idx))
