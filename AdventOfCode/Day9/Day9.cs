@@ -134,8 +134,8 @@ namespace AdventOfCode
             foreach (int i in indicies)
             {
                 visitedIndices.Clear();
-                int basinSize = GetBasinSize(i, input[i] - 1, input, visitedIndices, width, height);
-                basins.Add(basinSize);
+                GetBasinSize(i, input, visitedIndices, width);
+                basins.Add(visitedIndices.Count);
             }
 
             basins.Sort();
@@ -144,42 +144,35 @@ namespace AdventOfCode
             Console.WriteLine("Day 9 Part 2: The 3 largest basins are {0}, {1} and {2} with a product of {3}", basins[0], basins[1], basins[2], basins[0] * basins[1] * basins[2]);
         }
 
-        private static int GetBasinSize(int i, int prevValue, List<int> input, HashSet<int> visitedIndices, int width, int height)
+        private static void GetBasinSize(int i, List<int> input, HashSet<int> visitedIndices, int width)
         {
             int thisValue = input[i];
 
+            int height = input.Count / width;
             int columnIndex = i % width;
             int rowIndex = i / width;
 
-            int basinCount = 1;
-
-            if (thisValue > prevValue && thisValue < 9 && !visitedIndices.Contains(i))
+            if (thisValue < 9 && !visitedIndices.Contains(i))
             {
                 visitedIndices.Add(i);
 
                 if (columnIndex > 0)
                 {
-                    basinCount += GetBasinSize(i - 1, thisValue, input, visitedIndices, width, height);
+                    GetBasinSize(i - 1, input, visitedIndices, width);
                 }
                 if (columnIndex < width - 1)
                 {
-                    basinCount += GetBasinSize(i + 1, thisValue, input, visitedIndices, width, height);
+                    GetBasinSize(i + 1, input, visitedIndices, width);
                 }
                 if (rowIndex > 0)
                 {
-                    basinCount += GetBasinSize(i - width, thisValue, input, visitedIndices, width, height);
+                    GetBasinSize(i - width, input, visitedIndices, width);
                 }
                 if (rowIndex < height - 1)
                 {
-                    basinCount += GetBasinSize(i + width, thisValue, input, visitedIndices, width, height);
+                    GetBasinSize(i + width, input, visitedIndices, width);
                 }
-
-                return basinCount;
             }   
-            else
-            {
-                return 0;
-            }
         }
     }
 }
