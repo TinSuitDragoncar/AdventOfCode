@@ -15,12 +15,32 @@ namespace AdventOfCode
             public Node parent { get; }
             public string Data { get; set; }
             public List<Node> Children { get; set; }
+            public string DoubleSmall { get; set; }
 
             public Node(string data, Node parent = null)
             {
+                if (parent == null)
+                {
+                    DoubleSmall = null;
+                }
+                else
+                {
+                    DoubleSmall = parent.DoubleSmall;
+                    if (DoubleSmall == null &&
+                        Regex.IsMatch(data, "[a-z]") &&
+                        parent.ContainsData(data))
+                    {
+                        DoubleSmall = data;
+                    }
+                }
                 this.parent = parent;
                 this.Data = data;
                 Children = new List<Node>();
+            }
+
+            public void AssignDoubleSmall()
+            {
+
             }
 
             public bool ContainsData(string data)
@@ -106,7 +126,10 @@ namespace AdventOfCode
             List<string> possibleDirections;
             if (caveMap.TryGetValue(node.Data, out possibleDirections))
             {
-                node.Children = possibleDirections.Where(x => Regex.IsMatch(x, "[A-Z]") || !node.ContainsData(x)).Select(x => new Node(x, node)).ToList();
+                // Part 1
+                //node.Children = possibleDirections.Where(x => Regex.IsMatch(x, "[A-Z]") || !node.ContainsData(x)).Select(x => new Node(x, node)).ToList();
+                // Part 2
+                node.Children = possibleDirections.Where(x => Regex.IsMatch(x, "[A-Z]") || !node.ContainsData(x) || node.DoubleSmall == null).Select(x => new Node(x, node)).ToList();
                 foreach(Node n in node.Children)
                 {
                     PopulateTree(n, caveMap, uniquePaths);
