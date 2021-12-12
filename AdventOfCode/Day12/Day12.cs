@@ -44,7 +44,7 @@ namespace AdventOfCode
 
         public static void Part1()
         {
-            List<string> lines = File.ReadAllLines(@"Day12/test.txt").ToList();
+            List<string> lines = File.ReadAllLines(@"Day12/input.txt").ToList();
 
             Dictionary<string, List<string>> caveMap = new Dictionary<string, List<string>>();
 
@@ -78,28 +78,40 @@ namespace AdventOfCode
             }
 
             Node root = new Node("start");
-            int endCount = PopulateTree(root, caveMap);
-            Console.WriteLine("Day 12 Part 1: {0}", endCount);
+            HashSet<List<string>> uniquePaths = new HashSet<List<string>>();
+            PopulateTree(root, caveMap, uniquePaths);
+            foreach (List<string> path in uniquePaths)
+            {
+                Console.WriteLine("{0}", String.Join(',', path));
+            }
+            Console.WriteLine("{0} possible paths", uniquePaths.Count);
+            
         }
-        private static int PopulateTree(Node node, Dictionary<string, List<string>> caveMap)
+        private static void PopulateTree(Node node, Dictionary<string, List<string>> caveMap, HashSet<List<string>> uniquePaths)
         {
             if (node.Data == "end")
             {
-                return 1;
+                List<string> pathTaken = new List<string>();
+                Node searchNode = node;
+                while(searchNode != null)
+                {
+                    pathTaken.Add(searchNode.Data);
+                    searchNode = searchNode.parent;
+                }
+                pathTaken.Reverse();
+                uniquePaths.Add(pathTaken);
+                return;
             }
 
-            int endCount = 0;
             List<string> possibleDirections;
             if (caveMap.TryGetValue(node.Data, out possibleDirections))
             {
                 node.Children = possibleDirections.Where(x => Regex.IsMatch(x, "[A-Z]") || !node.ContainsData(x)).Select(x => new Node(x, node)).ToList();
                 foreach(Node n in node.Children)
                 {
-                    endCount += PopulateTree(n, caveMap);
+                    PopulateTree(n, caveMap, uniquePaths);
                 }
             }
-
-            return endCount;
         }
     }
 }
