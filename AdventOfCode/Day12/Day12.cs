@@ -10,63 +10,11 @@ namespace AdventOfCode
 {
     class Day12
     {
-        class Node
-        {
-            public Node parent { get; }
-            public string Data { get; set; }
-            public List<Node> Children { get; set; }
-            public string DoubleSmall { get; set; }
-
-            public Node(string data, Node parent = null)
-            {
-                if (parent == null)
-                {
-                    DoubleSmall = null;
-                }
-                else
-                {
-                    DoubleSmall = parent.DoubleSmall;
-                    if (DoubleSmall == null &&
-                        Regex.IsMatch(data, "[a-z]") &&
-                        parent.ContainsData(data))
-                    {
-                        DoubleSmall = data;
-                    }
-                }
-                this.parent = parent;
-                this.Data = data;
-                Children = new List<Node>();
-            }
-
-            public void AssignDoubleSmall()
-            {
-
-            }
-
-            public bool ContainsData(string data)
-            {
-                Node searchNode = parent;
-                while(searchNode != null)
-                {
-                    if (searchNode.Data == data)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        searchNode = searchNode.parent;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        public static void Part1()
+        public static void Part1And2()
         {
             List<string> lines = File.ReadAllLines(@"Day12/input.txt").ToList();
 
-            Dictionary<string, List<string>> caveMap = new Dictionary<string, List<string>>();
+            Dictionary<string, HashSet<string>> caveMap = new Dictionary<string, HashSet<string>>();
 
             foreach (string l in lines)
             {
@@ -75,66 +23,62 @@ namespace AdventOfCode
                 string startCave = caves[0];
                 string endCave = caves[1];
 
-                if (startCave != "end" && endCave != "start")
+                if (endCave != "start" && startCave != "end")
                 {
                     if (!caveMap.ContainsKey(startCave))
                     {
-                        caveMap.Add(startCave, new List<string>());
+                        caveMap.Add(startCave, new HashSet<string>());
                     }
-
                     caveMap[startCave].Add(endCave);
                 }
 
-
-                if (endCave != "end" && startCave != "start")
+                if (startCave != "start" && endCave != "end")
                 {
                     if (!caveMap.ContainsKey(endCave))
                     {
-                        caveMap.Add(endCave, new List<string>());
+                        caveMap.Add(endCave, new HashSet<string>());
                     }
-
                     caveMap[endCave].Add(startCave);
                 }
             }
 
-            Node root = new Node("start");
-            HashSet<List<string>> uniquePaths = new HashSet<List<string>>();
-            PopulateTree(root, caveMap, uniquePaths);
-            foreach (List<string> path in uniquePaths)
-            {
-                Console.WriteLine("{0}", String.Join(',', path));
-            }
-            Console.WriteLine("{0} possible paths", uniquePaths.Count);
+            HashSet<string> visitedCaves = new HashSet<string>();
+            Console.WriteLine("Day 12 Part 1: {0}", DepthFirstSearch("start", caveMap, visitedCaves, false));
+            visitedCaves.Clear();
+            Console.WriteLine("Day 12 Part 2: {0}", DepthFirstSearch("start", caveMap, visitedCaves, true));
             
         }
-        private static void PopulateTree(Node node, Dictionary<string, List<string>> caveMap, HashSet<List<string>> uniquePaths)
-        {
-            if (node.Data == "end")
-            {
-                List<string> pathTaken = new List<string>();
-                Node searchNode = node;
-                while(searchNode != null)
-                {
-                    pathTaken.Add(searchNode.Data);
-                    searchNode = searchNode.parent;
-                }
-                pathTaken.Reverse();
-                uniquePaths.Add(pathTaken);
-                return;
-            }
 
-            List<string> possibleDirections;
-            if (caveMap.TryGetValue(node.Data, out possibleDirections))
+        private static int DepthFirstSearch(string current, Dictionary<string, HashSet<string>> caveMap, HashSet<string> visitedCaves, bool bAllowTwice)
+        {
+            if (current == "end")
             {
-                // Part 1
-                //node.Children = possibleDirections.Where(x => Regex.IsMatch(x, "[A-Z]") || !node.ContainsData(x)).Select(x => new Node(x, node)).ToList();
-                // Part 2
-                node.Children = possibleDirections.Where(x => Regex.IsMatch(x, "[A-Z]") || !node.ContainsData(x) || node.DoubleSmall == null).Select(x => new Node(x, node)).ToList();
-                foreach(Node n in node.Children)
+                return 1;
+            }
+            else if (caveMap[current] == null)
+            {
+                return 0;
+            }
+            else if (Regex.IsMatch(current, "[a-z]") &&
+                    visitedCaves.Contains(current))
+            {
+                if (bAllowTwice)
                 {
-                    PopulateTree(n, caveMap, uniquePaths);
+                    bAllowTwice = false;
+                }
+                else
+                {
+                    return 0;
                 }
             }
+            int pathCount = 0;
+
+            visitedCaves.Add(current);
+            foreach (string path in caveMap[current])
+            {
+                pathCount += DepthFirstSearch(path, caveMap, new HashSet<string>(visitedCaves), bAllowTwice);
+            }
+            return pathCount;
         }
     }
 }
