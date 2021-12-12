@@ -130,7 +130,6 @@ namespace AdventOfCode
             }
 
             return flashCount;
-
         }
     }
 }
