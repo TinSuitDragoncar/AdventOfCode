@@ -53,14 +53,7 @@ namespace AdventOfCode
                 string line = "";
                 for (int x = xMin; x <= xMax; ++x)
                 {
-                    if (points.Contains(new (x, y)))
-                    {
-                        line += '#';
-                    }
-                    else
-                    {
-                        line += '.';
-                    }
+                    line += points.Contains(new(x, y)) ? '#' : '.';
                 }
                 Console.WriteLine(line);
             }
