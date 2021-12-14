@@ -9,7 +9,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            Day13.Part1And2();
+            Day14.Solve();
         }
     }
 }
