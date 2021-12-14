@@ -11,52 +11,55 @@ namespace AdventOfCode
     {
         public static void Solve()
         {
-            List<string> lines = File.ReadAllLines(@"Day14/input.txt").ToList();
-
-
-            string initialState = lines.First();
-            lines.RemoveRange(0, 2);
-            Console.WriteLine("Template: {0}", initialState);
-
-            Dictionary<string, string> polyMap = lines.Select(x => x.Split("->", StringSplitOptions.TrimEntries)).ToDictionary(x => x[0], x => x[1]);
-            const int steps = 10;
-            for (int i = 0; i < steps; ++i)
-            {
-                initialState = Step(initialState, polyMap);
-                //Console.WriteLine("After Step {0}: {1}", i + 1, initialState);
-            }
-            int minCount = Int32.MaxValue;
-            int maxCount = Int32.MinValue;
-            foreach (char c in initialState.Distinct())
-            {
-                int count = initialState.Where(x => x == c).ToList().Count;
-                if (count < minCount)
-                {
-                    minCount = count;
-                }
-                else if (count > maxCount)
-                {
-                    maxCount = count;
-                }
-            }
-            Console.WriteLine("Max {0} - Min {1} = {2}", maxCount, minCount, maxCount - minCount);
-            
+            Console.WriteLine("Part 1 (10 steps)");
+            SolveForSteps(10);
+            Console.WriteLine("Part 2 (40 steps)");
+            SolveForSteps(40);
         }
 
-        private static string Step(string input, Dictionary<string, string> polyMap)
+        public static void SolveForSteps(int steps)
         {
-            string ret = input;
-            int insertionOffset = 0;
-            for (int i = 1; i < input.Count; ++i)
+            List<string> lines = File.ReadAllLines(@"Day14/input.txt").ToList();
+            string initialState = lines.First();
+
+            Dictionary<string, (string, string)> polyMap = lines.Skip(2).Select(x => x.Split("->", StringSplitOptions.TrimEntries)).ToDictionary(x => x[0], x => (x[0][0] + x[1], x[1] + x[0][1]));
+            Dictionary<string, ulong> pairFrequency = new Dictionary<string, ulong>();
+            foreach (string s in polyMap.Keys.Distinct())
             {
-                string sub = input.Substring(i - 1, 2);
-                if (polyMap.TryGetValue(sub, out string  monomer))
-                {
-                    ret = ret.Insert(i + insertionOffset, monomer);
-                    ++insertionOffset;
-                }
+                pairFrequency.Add(s, 0);
             }
-            return ret;
+            for (int i = 0; i < initialState.Count() - 1; i++)
+            {
+                pairFrequency[initialState.Substring(i, 2)]++;
+            }
+
+            for (int i = 0; i < steps; i++)
+            {
+                Dictionary<string, ulong> newFrequency = new Dictionary<string, ulong>(pairFrequency);
+                foreach (var entry in pairFrequency)
+                {
+                    (string, string) newPairs = polyMap[entry.Key];
+
+                    newFrequency[newPairs.Item1] += entry.Value;
+                    newFrequency[newPairs.Item2] += entry.Value;
+                    newFrequency[entry.Key] -= entry.Value;
+                }
+                pairFrequency = newFrequency;
+            }
+
+            // Count frequencies
+            Dictionary<char, ulong> occurences = new Dictionary<char, ulong>();
+            foreach(var entry in pairFrequency)
+            {
+                occurences.TryAdd(entry.Key[0], 0);
+                occurences.TryAdd(entry.Key[1], 0);
+                occurences[entry.Key[0]] += entry.Value;
+                occurences[entry.Key[1]] += entry.Value;
+            }
+
+            ulong max = (occurences.Values.Max() + 1) / 2;
+            ulong min = (occurences.Values.Min() + 1) / 2;
+            Console.WriteLine("Max {0} - Min {1} = {2}", max, min, max - min);
         }
     }
 }
