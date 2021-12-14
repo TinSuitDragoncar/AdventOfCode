@@ -11,22 +11,12 @@ namespace AdventOfCode
 {
     class Day13
     {
-        record Point
-        {
-            public int X { get; init; }
-            public int Y { get; init; }
-            public Point(int[] coords)
-                => (X, Y) = (coords[0], coords[1]);
-            public Point(int x, int y)
-                => (X, Y) = (x, y);
-        }
-
         public static void Part1And2()
         {
             List<string> lines = File.ReadAllLines(@"Day13/input.txt").ToList();
 
             List<string> folds = lines.Where(x => Regex.IsMatch(x, "[a-z]")).ToList();
-            HashSet<Point> points = lines.Where(x => Regex.IsMatch(x, @"\d+,\d+")).Select(x => new Point(x.Split(',').Select(y => Int32.Parse(y)).ToArray())).ToHashSet();
+            HashSet<(int X, int Y)> points = lines.Where(x => Regex.IsMatch(x, @"\d+,\d+")).Select(x => x.Split(',').Select(y => Int32.Parse(y)).ToArray()).Select(x => (x[0], x[1])).ToHashSet();
 
             Console.WriteLine("Starting with {0} points.", points.Count());
             foreach (string fold in folds)
@@ -40,29 +30,22 @@ namespace AdventOfCode
             }
             PrintPoints(points);
         }
-
-        private static void PrintPoints(HashSet<Point> points)
+        private static void PrintPoints(HashSet<(int X, int Y)> points)
         {
-            int yMin = points.Min(x => x.Y);
-            int yMax = points.Max(x => x.Y);
-            int xMin = points.Min(x => x.X);
-            int xMax = points.Max(x => x.X);
-
-            for (int y = yMin; y <= yMax; ++y)
+            for (int y = points.Min(x => x.Y); y <= points.Max(x => x.Y); ++y)
             {
                 string line = "";
-                for (int x = xMin; x <= xMax; ++x)
+                for (int x = points.Min(x => x.X); x <= points.Max(x => x.X); ++x)
                 {
-                    line += points.Contains(new(x, y)) ? '#' : '.';
+                    line += points.Contains((x, y)) ? '#' : '.';
                 }
                 Console.WriteLine(line);
             }
         }
-
-        private static HashSet<Point> Fold(HashSet<Point> visiblePoints, int bXFold, int foldIdx)
+        private static HashSet<(int X, int Y)> Fold(HashSet<(int X, int Y)> visiblePoints, int bXFold, int foldIdx)
         {
-            HashSet<Point> newPoints = new HashSet<Point>();
-            foreach (Point point in visiblePoints)
+            HashSet<(int X, int Y)> newPoints = new HashSet<(int X, int Y)>();
+            foreach ((int X, int Y) point in visiblePoints)
             {
                 int[] p = new int[] { point.X, point.Y };
                 int pIdx = 1 - bXFold;
@@ -74,7 +57,7 @@ namespace AdventOfCode
                 {
                     p[pIdx] = 2 * foldIdx - p[pIdx];
                 }
-                newPoints.Add(new Point(p));
+                newPoints.Add((p[0], p[1]));
             }
             return newPoints;
         }
