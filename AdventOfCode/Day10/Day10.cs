@@ -123,7 +123,6 @@ namespace AdventOfCode
 
             scores.Sort();
 
-
             Console.WriteLine("Day 10 Part 2: {0}", scores[scores.Count/2]);
         }
     }
