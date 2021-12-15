@@ -9,8 +9,6 @@ namespace AdventOfCode
 {
     class Day15
     {
-         
-
         public static void Solve()
         {
             List<string> lines = File.ReadAllLines(@"Day15/input.txt").ToList();
@@ -21,7 +19,27 @@ namespace AdventOfCode
             int minRisk = Dijkstra(0, input.Count - 1, input, width);
             Console.WriteLine("Day 15 Part 1: {0}", minRisk);
 
-            minRisk = Dijkstra(0, input.Count - 1, input, width);
+            List<int> part2Input = new();
+
+            for (int i = 0; i < input.Count * 25; ++i)
+            {
+                int innerX = i % width;
+                int innerY = (i / (width * 5)) % width;
+
+                int outerX = (i % (width * 5)) / width;
+                int outerY = i / (width * width * 5);
+
+                int innerIdx = innerY * width + innerX;
+
+                int newVal = input[innerIdx] + outerX + outerY;
+                if (newVal > 9)
+                {
+                    newVal -= 9;
+                }
+                part2Input.Add(newVal);
+            }
+
+            minRisk = Dijkstra(0, part2Input.Count - 1, part2Input, width * 5);
             Console.WriteLine("Day 15 Part 2: {0}", minRisk);
         }
 
