@@ -44,74 +44,15 @@ namespace AdventOfCode
 
         public static void Solve()
         {
-            List<int> bits = File.ReadAllLines(@"Day16/test.txt").First().Select(x => Convert.ToInt32(x.ToString(), 16)).Select(x => Convert.ToString(x, 2).PadLeft(4, '0')).SelectMany(s => s.Select(c => c == '1' ? 1 : 0)).ToList();
-
-
-            State state = State.Version;
-            bool bLiteral = false;
-            int idx = 0;
-            int versionCount = 0;
-
-            int literalVal = 0;
-            int literalIdx = 0;
-
-            bool bLengthType = false;
-            int length = 0;
-            while (idx < bits.Count)
+            string[] lines = File.ReadAllLines(@"Day16/input.txt");
+            foreach (string l in lines)
             {
-                switch(state)
-                {
-                    case State.Version:
-                        versionCount += Sum(bits, idx, 3);
-                        state = State.Type;
-                        idx += 3;
-                        break;
-
-                    case State.Type:
-                        int typeID = Sum(bits, idx, 3);
-                        bLiteral = typeID == 4;
-                        state = bLiteral ? State.LiteralPacket : State.LengthType;
-                        idx += 3;
-                        break;
-
-                    case State.LiteralPacket:
-                        bool bLastPacket = !Convert.ToBoolean(bits[idx]);
-
-                        literalVal <<= 4;
-                        literalVal |= Sum(bits, idx + 1, 4);
-                        if (bLastPacket)
-                        {
-                            Console.WriteLine(literalVal);
-                            literalVal = 0;
-                            literalIdx = 0;
-
-                            state = State.Version;
-                        }
-                        else
-                        {
-                            ++literalIdx;
-                        }
-
-                        idx += 5;
-                        break;
-
-                    case State.LengthType:
-                        bLengthType = Convert.ToBoolean(bits[idx]);
-                        state = State.Length;
-                        length = 0;
-                        ++idx;
-                        break;
-
-                    case State.Length:
-                        length = bLengthType ? 11 : 15;
-                        length = Sum(bits, idx, length);
-                        idx += length;
-                        state = State.SubPacket;
-                        break;
-                }
+                List<int> bits = l.Select(x => Convert.ToInt32(x.ToString(), 16)).Select(x => Convert.ToString(x, 2).PadLeft(4, '0')).SelectMany(s => s.Select(c => c == '1' ? 1 : 0)).ToList();
+                _versionCount = 0;
+                Console.WriteLine("Decoding {0}", l);
+                EvaluatePacket(bits);
+                Console.WriteLine("Day 16 Part 1: Version count is: {0}", _versionCount);
             }
-
-            Console.WriteLine("Day 16 Part 1: Version count is: {0}", versionCount);
         }
 
         public static int _versionCount = 0;
@@ -121,7 +62,7 @@ namespace AdventOfCode
         /// </summary>
         /// <param name="bits"></param>
         /// <returns>Packet size</returns>
-        private static int EvaluatePacket(List<int> bits)
+        private static int EvaluatePacket(List<int> bits, bool bSinglePacketOnly = false)
         {
             State state = State.Version;
             bool bLiteral = false;
@@ -130,16 +71,36 @@ namespace AdventOfCode
             int literalVal = 0;
             int literalIdx = 0;
 
+            bool bPacketFound = false;
+
             bool bLengthType = false;
             int length = 0;
             while (idx < bits.Count)
             {
+                if (state == State.Version &&
+                    bPacketFound &&
+                    bSinglePacketOnly)
+                {
+                    break;
+                }
                 switch (state)
                 {
                     case State.Version:
-                        _versionCount += Sum(bits, idx, 3);
-                        state = State.Type;
-                        idx += 3;
+                        bPacketFound = true;
+                        // minimum packet size is 11 so if size is smaller than that we've reached the end of the packet
+                        if (bits.Count - idx >= 11)
+                        {
+                            int ver = Sum(bits, idx, 3);
+                            Console.WriteLine("Version: {0}", ver);
+                            _versionCount += ver;
+                            state = State.Type;
+                            idx += 3;
+                        }
+                        else
+                        {
+                            return idx;
+                        }
+                        
                         break;
 
                     case State.Type:
@@ -156,7 +117,7 @@ namespace AdventOfCode
                         literalVal |= Sum(bits, idx + 1, 4);
                         if (bLastPacket)
                         {
-                            Console.WriteLine(literalVal);
+                            Console.WriteLine("Literal Value: {0}", literalVal);
                             literalVal = 0;
                             literalIdx = 0;
 
@@ -178,14 +139,14 @@ namespace AdventOfCode
                         break;
 
                     case State.Length:
-                        length = bLengthType ? 11 : 15;
-                        length = Sum(bits, idx, length);
-                        idx += length;
+                        int lengthLength = bLengthType ? 11 : 15;
+                        length = Sum(bits, idx, lengthLength);
+                        idx += lengthLength;
                         state = State.SubPacket;
                         break;
 
                     case State.SubPacket:
-                        int subLength = EvaluatePacket(new List<int>(bits.GetRange(idx, bits.Count - idx)));
+                        int subLength = EvaluatePacket(new List<int>(bits.GetRange(idx, bits.Count - idx - 1)), true);
                         if (bLengthType)
                         {
                             length--;
@@ -194,7 +155,7 @@ namespace AdventOfCode
                         {
                             length -= subLength;
                         }
-                        if (length == 0)
+                        if (length <= 0)
                         {
                             state = State.Version;
                         }
