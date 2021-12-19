@@ -10,22 +10,6 @@ namespace AdventOfCode
 {
     class Day16
     {
-        // Read version
-        // read type ID
-            // if Type ID 4 then is literal
-            // read next few literal values (5 bits each, last packet starts with a 0)
-            // concatenate the bits to get the literal value
-
-            // else
-
-            // Is operator packet
-            // read next 1 bit
-                // if 0 then the next 15 bits represents the total length of sub packets which will follow
-                // if 1 then the next 11 bits indicate the number of sub packets which will follow
-                // sub packets could either be operator or literal types
-
-            
-            
         enum State
         {
             Version,
@@ -38,8 +22,14 @@ namespace AdventOfCode
 
         enum TypeID
         {
-            Literal,
-            Operator
+            Sum = 0,
+            Product = 1,
+            Min = 2,
+            Max = 3,
+            Literal = 4,
+            GreaterThan = 5,
+            LessThan = 6,
+            Equal = 7
         }
 
         public static void Solve()
@@ -50,31 +40,39 @@ namespace AdventOfCode
                 List<int> bits = l.Select(x => Convert.ToInt32(x.ToString(), 16)).Select(x => Convert.ToString(x, 2).PadLeft(4, '0')).SelectMany(s => s.Select(c => c == '1' ? 1 : 0)).ToList();
                 _versionCount = 0;
                 Console.WriteLine("Decoding {0}", l);
-                EvaluatePacket(bits);
+                EvaluatePacket(bits, out long finalValue);
                 Console.WriteLine("Day 16 Part 1: Version count is: {0}", _versionCount);
+                Console.WriteLine("Day 16 Part 2: Operation result is: {0}", finalValue);
             }
         }
 
-        public static int _versionCount = 0;
+        public static long _versionCount = 0;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="bits"></param>
+        /// <param name="bits">bits to evaluate, each int should be 1 or 0</param>
+        /// <param name="bSinglePacketOnly">If this flag is true the function exits after the first packet is evaluated</param>
         /// <returns>Packet size</returns>
-        private static int EvaluatePacket(List<int> bits, bool bSinglePacketOnly = false)
+        private static int EvaluatePacket(List<int> bits, out long opVal, bool bSinglePacketOnly = false)
         {
+            opVal = 0;
+
             State state = State.Version;
-            bool bLiteral = false;
             int idx = 0;
 
-            int literalVal = 0;
+            long literalVal = 0;
             int literalIdx = 0;
 
             bool bPacketFound = false;
 
             bool bLengthType = false;
-            int length = 0;
+            long length = 0;
+
+            TypeID t = TypeID.Sum;
+
+            List<long> operatorParams = new();
+
             while (idx < bits.Count)
             {
                 if (state == State.Version &&
@@ -90,7 +88,7 @@ namespace AdventOfCode
                         // minimum packet size is 11 so if size is smaller than that we've reached the end of the packet
                         if (bits.Count - idx >= 11)
                         {
-                            int ver = Sum(bits, idx, 3);
+                            long ver = Sum(bits, idx, 3);
                             Console.WriteLine("Version: {0}", ver);
                             _versionCount += ver;
                             state = State.Type;
@@ -104,9 +102,8 @@ namespace AdventOfCode
                         break;
 
                     case State.Type:
-                        int typeID = Sum(bits, idx, 3);
-                        bLiteral = typeID == 4;
-                        state = bLiteral ? State.LiteralPacket : State.LengthType;
+                        t = (TypeID) Sum(bits, idx, 3);
+                        state = t == TypeID.Literal ? State.LiteralPacket : State.LengthType;
                         idx += 3;
                         break;
 
@@ -118,9 +115,15 @@ namespace AdventOfCode
                         if (bLastPacket)
                         {
                             Console.WriteLine("Literal Value: {0}", literalVal);
-                            literalVal = 0;
-                            literalIdx = 0;
-
+                            if (bSinglePacketOnly)
+                            {
+                                opVal = literalVal;
+                            }   
+                            else
+                            {
+                                literalVal = 0;
+                                literalIdx = 0;
+                            }
                             state = State.Version;
                         }
                         else
@@ -146,7 +149,9 @@ namespace AdventOfCode
                         break;
 
                     case State.SubPacket:
-                        int subLength = EvaluatePacket(new List<int>(bits.GetRange(idx, bits.Count - idx - 1)), true);
+                        int subLength = EvaluatePacket(new List<int>(bits.GetRange(idx, bits.Count - idx)), out long newOpVal, true);
+                        operatorParams.Add(newOpVal);
+
                         if (bLengthType)
                         {
                             length--;
@@ -157,6 +162,7 @@ namespace AdventOfCode
                         }
                         if (length <= 0)
                         {
+                            opVal = EvaluateOpVal(operatorParams, t);
                             state = State.Version;
                         }
                         idx += subLength;
@@ -167,7 +173,44 @@ namespace AdventOfCode
             return idx;
         }
 
-        private static int Sum(List<int> bits, int idx, int count)
+        private static long EvaluateOpVal(List<long> operatorParams, TypeID t)
+        {
+            long result = -1;
+            if (operatorParams.Count == 1)
+            {
+                return operatorParams.First();
+            }
+
+            switch(t)
+            {
+                case TypeID.Sum:
+                    result = operatorParams.Sum();
+                    break;
+
+                case TypeID.Product:
+                    result = operatorParams.Aggregate((total, next) => total * next);
+                    break;
+
+                case TypeID.Min:
+                    result = operatorParams.Min();
+                    break;
+                case TypeID.Max:
+                    result = operatorParams.Max();
+                    break;
+                case TypeID.GreaterThan:
+                    result = operatorParams[0] > operatorParams[1] ? 1 : 0;
+                    break;
+                case TypeID.LessThan:
+                    result = operatorParams[0] < operatorParams[1] ? 1 : 0;
+                    break;
+                case TypeID.Equal:
+                    result = operatorParams[0] == operatorParams[1] ? 1 : 0;
+                    break;
+            }
+            return result;
+        }
+
+        private static long Sum(List<int> bits, int idx, int count)
         {
             int sum = 0;
             for (int i = 0; i < count; ++i)
