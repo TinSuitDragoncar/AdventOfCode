@@ -61,8 +61,8 @@ namespace AdventOfCode
                 int botLeft = botIdx - 1;
                 int botRight = botIdx + 1;
                 List<int> indices = new();
-                if (oldColumnIdx >= 0 &&
-                    oldRowIdx >= 0)
+                if (oldColumnIdx > 0 &&
+                    oldRowIdx > 0)
                 {
                     indices.Add(topLeft); //
                 }
@@ -70,7 +70,7 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldRowIdx >= 0)
+                if (oldRowIdx > 0)
                 {
                     indices.Add(topIdx); //
                 }
@@ -78,8 +78,8 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldColumnIdx < width &&
-                    oldRowIdx >= 0)
+                if (oldColumnIdx < width - 1 &&
+                    oldRowIdx > 0)
                 {
                     indices.Add(topRight); //
                 }
@@ -87,7 +87,7 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldColumnIdx >= 0)
+                if (oldColumnIdx > 0)
                 {
                     indices.Add(leftIdx); //
                 }
@@ -106,7 +106,7 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldColumnIdx < width)
+                if (oldColumnIdx < width - 1)
                 {
                     indices.Add(rightIdx); //
                 }
@@ -114,8 +114,8 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldColumnIdx >= 0 &&
-                    oldRowIdx < width)
+                if (oldColumnIdx > 0 &&
+                    oldRowIdx < width - 1)
                 {
                     indices.Add(botLeft); //
                 }
@@ -123,7 +123,7 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldRowIdx < width)
+                if (oldRowIdx < width - 1)
                 {
                     indices.Add(botIdx); //
                 }
@@ -131,8 +131,8 @@ namespace AdventOfCode
                 {
                     indices.Add(-1); //
                 }
-                if (oldColumnIdx < width &&
-                    oldRowIdx < width)
+                if (oldColumnIdx < width - 1 &&
+                    oldRowIdx < width - 1)
                 {
                     indices.Add(botRight); //
                 }
