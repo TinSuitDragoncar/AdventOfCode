@@ -11,174 +11,103 @@ namespace AdventOfCode
     {
         public static void Solve()
         {
-            string[] lines = File.ReadAllLines(@"Day20/test.txt");
+            string[] lines = File.ReadAllLines(@"Day20/input.txt");
 
             List<int> algorithm = lines.First().Select(x => Convert.ToInt32(x == '#')).ToList();
 
-            int width = lines[2].Length;
+            List<List<int>> input = new();
 
-            List<int> input = lines.Skip(2).SelectMany(l => l.Select(x => Convert.ToInt32(x == '#'))).ToList();
+            foreach (string l in lines.Skip(2))
+            {
+                input.Add(l.Select(x => Convert.ToInt32(x == '#')).ToList());
+            }
 
-            PrintInput(input, width);
-            input = ExpandInput(input, width, algorithm);
-            PrintInput(input, width + 2);
-            //input = ExpandInput(input, width + 2, algorithm);
-            //PrintInput(input, width + 4);
+            int steps = 50;
+            for (int i = 0; i < steps; ++i)
+            {
+                input = ExpandInput(input, algorithm, i);
+
+                if (i == 1) // Part 1
+                {
+                    PrintInput(input);
+                }
+            }
+
+            PrintInput(input);
         }
 
-        private static List<int> ExpandInput(List<int> input, int width, List<int> algorithm)
+        private static List<List<int>> ExpandInput(List<List<int>> input, List<int> algorithm, int step)
         {
-            int newWidth = width + 2;
-
-            List<int> newInput = new();
-            int newInputLength = input.Count + 4 * width + 4;
-
-            for(int i = 0; i < newInputLength; ++i)
+            // expand input
+            int[] arr = new int[input.Count];
+            int initialValue = 0;
+            if (algorithm.First() == 1)
             {
-                int newColumnIdx = i % newWidth;
-                int newRowIdx = i / newWidth;
+                initialValue = step % 2 == 1 ? algorithm.First() : algorithm.Last();
+                arr = arr.Select(x => initialValue).ToArray();
+            }
+            input.Insert(0, new(arr));
+            input.Insert(0, new(arr));
+            input.Add(new(arr));
+            input.Add(new(arr));
 
-                int oldColumnIdx = newColumnIdx - 1;
-                int oldRowIdx = newRowIdx - 1;
+            foreach(var inner in input)
+            {
+                inner.Insert(0, initialValue);
+                inner.Insert(0, initialValue);
+                inner.Add(initialValue);
+                inner.Add(initialValue);
+            }
 
-                int oldIdx = i - 1 - newWidth;
-                //if (oldRowIdx >= 0 &&
-                //    oldColumnIdx >= 0 &&
-                //    oldRowIdx < width &&
-                //    oldColumnIdx < width)
-                //{
-                //    oldIdx = 
-                //}
+            List<List<int>> newInput = new();
+            foreach(var inner in input)
+            {
+                newInput.Add(new(inner));
+            }
 
-                // Calculate new value
-                int pixelVal = 0;
-                int topIdx = oldIdx - newWidth;
-                int botIdx = oldIdx + newWidth;
-                int leftIdx = oldIdx - 1;
-                int rightIdx = oldIdx + 1;
-                int topLeft = topIdx - 1;
-                int topRight = topIdx + 1;
-                int botLeft = botIdx - 1;
-                int botRight = botIdx + 1;
-                List<int> indices = new();
-                if (oldColumnIdx > 0 &&
-                    oldRowIdx > 0)
+            for (int i = 0; i < input.Count; ++i)
+            {
+                for ( int j = 0; j < input.Count; ++j)
                 {
-                    indices.Add(topLeft); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldRowIdx > 0)
-                {
-                    indices.Add(topIdx); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldColumnIdx < width - 1 &&
-                    oldRowIdx > 0)
-                {
-                    indices.Add(topRight); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldColumnIdx > 0)
-                {
-                    indices.Add(leftIdx); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldColumnIdx >= 0 &&
-                    oldColumnIdx < width &&
-                    oldRowIdx >= 0 &&
-                    oldRowIdx < width)
-                {
-                    indices.Add(oldIdx); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldColumnIdx < width - 1)
-                {
-                    indices.Add(rightIdx); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldColumnIdx > 0 &&
-                    oldRowIdx < width - 1)
-                {
-                    indices.Add(botLeft); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldRowIdx < width - 1)
-                {
-                    indices.Add(botIdx); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-                if (oldColumnIdx < width - 1 &&
-                    oldRowIdx < width - 1)
-                {
-                    indices.Add(botRight); //
-                }
-                else
-                {
-                    indices.Add(-1); //
-                }
-
-
-
-                //indices.Add(topIdx); // 
-                //indices.Add(topRight); // 
-                //indices.Add(leftIdx); // 
-                //indices.Add(oldIdx); // 
-                //indices.Add(rightIdx); // 
-                //indices.Add(botLeft); // 
-                //indices.Add(botIdx); // 
-                //indices.Add(botRight); // 
-                for(int j = 0; j < indices.Count; ++j)
-                {
-                    int idxToCheck = indices[j];
-                    if (idxToCheck >= 0 &&
-                        idxToCheck < input.Count)
+                    int pixelValue = 0;
+                    int shiftCount = 8;
+                    foreach (int k in new int[] { -1, 0, 1 })
                     {
-                        pixelVal |= input[idxToCheck] << (8 - j);
-                    }
-                }
+                        foreach (int l in new int[] { -1, 0, 1 })
+                        {
+                            int xIdx = j + l;
+                            int yIdx = i + k;
 
-                newInput.Add(algorithm[pixelVal]);
+                            if (xIdx >= 0 &&
+                                yIdx >= 0 &&
+                                xIdx < input.Count &&
+                                yIdx < input.Count)
+                            {
+                                pixelValue |= input[yIdx][xIdx] << shiftCount;
+                            }
+                            else
+                            {
+                                pixelValue |= initialValue << shiftCount;
+                            }
+
+                            --shiftCount;
+                        }
+                    }
+                    newInput[i][j] = algorithm[pixelValue];
+                }
             }
 
             return newInput;
         }
-        private static void PrintInput(List<int> input, int width)
+
+        private static void PrintInput(List<List<int>> input)
         {
-            for (int i = 0; i < width; ++i)
+            foreach (var inner in input)
             {
-                string line = "";
-                for (int j = 0; j < width; ++j)
-                {
-                    line += input[i * width + j] == 1 ? '#' : '.';
-                }
-                Console.WriteLine(line);
+                Console.WriteLine(String.Join(' ', inner.Select(x => x == 1 ? '#' : '.')));
             }
 
-            Console.WriteLine("{0} Lit Pixels", input.Where(x => x == 1).Count());
+            Console.WriteLine("{0} Lit Pixels", input.SelectMany(l => l.Where(x => x == 1)).Count());
         }
     }
 }
