@@ -19,7 +19,23 @@ namespace AdventOfCode
             (int a, int b) xLims = (Int32.Parse(xM.Groups[1].ToString()), Int32.Parse(xM.Groups[2].ToString()));
             (int a, int b) yLims = (Int32.Parse(yM.Groups[1].ToString()), Int32.Parse(yM.Groups[2].ToString()));
 
-            int xMin = 
+            int xMaxStart = xLims.b;
+
+            int yMinStart = yLims.b;
+
+            int maxHeight = Int32.MinValue;
+            foreach (int x in Enumerable.Range(0, xMaxStart))
+            {
+                bool bSuccess = true;
+                int y = yMinStart;
+                while (bSuccess)
+                {
+                    // carry out steps
+
+                    //set bSuccess to false if we overshoot
+                }
+
+            }
         }
     }
 }
