@@ -12,12 +12,12 @@ namespace AdventOfCode
     {
         public static void Solve()
         {
-            string[] lines = File.ReadAllLines(@"Day21/test.txt");
+            string[] lines = File.ReadAllLines(@"Day21/input.txt");
 
             int p1Pos = Int32.Parse(lines[0].Last().ToString()) - 1;
             int p2Pos = Int32.Parse(lines[1].Last().ToString()) - 1;
 
-            int dd = 1;
+            int dd = 100;
             bool p1Win = false;
             bool p2Win = false;
 
