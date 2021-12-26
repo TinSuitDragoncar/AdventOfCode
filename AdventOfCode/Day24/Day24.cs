@@ -10,398 +10,225 @@ namespace AdventOfCode
 {
     class Day24
     {
-        public static void CreateFunction()
+        long[] As = { 1, 1, 1, 1, 26, 1, 26, 1, 26, 26, 1, 26, 26, 26};
+        long[] Bs = { 11, 14, 10, 14, -8, 14, -11, 10, -6, -9, 12, -5, -4, -9};
+        long[] Cs = { 7, 8, 16, 8, 3, 12, 1, 8, 8, 14, 4, 14, 15, 6};
+
+        public static List<List<string>> GetChunks()
         {
             string[] lines = File.ReadAllLines(@"Day24/input.txt");
 
+            //int dTemp = 0;
+            //bool bCaptureNext = false;
+
+            List<List<string>> chunks = new();
+
             foreach (string l in lines)
             {
-                Match m = Regex.Match(l, @"(\w+) (\w) ([-a-z0-9]+)");
-
-                if (m.Success)
+                if (l.Contains("inp"))
                 {
-                    string op = m.Groups[1].ToString();
-                    string a = m.Groups[2].ToString();
-                    string b = m.Groups[3].ToString();
-
-                    switch (op)
-                    {
-                        case "add":
-                            Console.WriteLine("{0} += {1};", a, b);
-                            break;
-
-                        case "mul":
-                            Console.WriteLine("{0} *= {1};", a, b);
-                            break;
-
-                        case "div":
-                            Console.WriteLine("{0} /= {1};", a, b);
-                            break;
-
-                        case "mod":
-                            Console.WriteLine("{0} %= {1};", a, b);
-                            break;
-
-                        case "eql":
-                            Console.WriteLine("{0} = Convert.ToInt64({0} == {1});", a, b);
-                            break;
-                    }
+                    chunks.Add(new());
                 }
-                else // read input
+                else
                 {
-                    string varName = l.Last().ToString();
-                    Console.WriteLine("{0} = digits.Pop();", varName);
+                    chunks.Last().Add(l);
                 }
+
+                // if after 4th (idx 3) we have < 26 then get rid of
+
+                //if (l == "add y w")
+                //{
+                //    bCaptureNext = true;
+                //    continue;
+                //}
+                //else if (bCaptureNext)
+                //{
+                //    bCaptureNext = false;
+                //    Match mq = Regex.Match(l, @"add y ([0-9-]+)");
+                //    int q = Int32.Parse(mq.Groups[1].ToString());
+                //    unknowns.Add((q, dTemp));
+                //}
+
+                //Match m = Regex.Match(l, @"div z ([0-9-]+)");
+
+                //if (m.Success)
+                //{
+                //    dTemp = Int32.Parse(m.Groups[1].ToString());
+                //}
             }
+
+            return chunks;
         }
 
-        private static bool Check(long modelNumber)
+        public static bool TryDecodeZ(List<string> chunk, int wInput, HashSet<long> desiredValues, out List<long> validZ)
         {
-            long x, y, z, w = 0;
+            Dictionary<string, long> variables = new();
+            validZ = new();
 
+            // assume z cannot be greater than 1000
+            for (int z = 0; z <= 32; z++)
+            {
+                variables["w"] = wInput;
+                variables["x"] = 0; // x and y always set to 0
+                variables["y"] = 0;
+                variables["z"] = z;
 
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 11;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 7;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 14;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 8;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 10;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 16;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 14;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 8;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -8;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 3;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 14;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 12;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -11;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 1;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 10;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 8;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -6;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 8;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -9;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 14;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 1;
-            x += 12;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 4;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -5;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 14;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -4;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 15;
-            y *= x;
-            z += y;
-            w = digits.Pop();
-            x *= 0;
-            x += z;
-            x %= 26;
-            z /= 26;
-            x += -9;
-            x = Convert.ToInt64(x == w);
-            x = Convert.ToInt64(x == 0);
-            y *= 0;
-            y += 25;
-            y *= x;
-            y += 1;
-            z *= y;
-            y *= 0;
-            y += w;
-            y += 6;
-            y *= x;
-            z += y;
+                // perform logic
+                foreach (string l in chunk)
+                {
+                    //DecodeLine(variables, l);
+                }
+
+                if (desiredValues.Contains(variables["z"]))
+                {
+                    validZ.Add(z);
+                }
+            }
+
+            return validZ.Count > 0;
+        }
+
+        private static void DecodeLine(Dictionary<string, long> variables, string line)
+        {
+            Match m = Regex.Match(line, @"(\w+) (\w) ([-a-z0-9]+)");
+
+            string op = m.Groups[1].ToString();
+            string a = m.Groups[2].ToString();
+            string b = m.Groups[3].ToString();
+
+            bool bVariable = variables.ContainsKey(b);
+            long valToUse = bVariable ? variables[b] : Int64.Parse(b);
+
+            switch (op)
+            {
+                case "add":
+                    variables[a] += valToUse;
+                    break;
+
+                case "mul":
+                    variables[a] *= valToUse;
+                    break;
+
+                case "div":
+                    variables[a] /= valToUse;
+                    break;
+
+                case "mod":
+                    variables[a] %= valToUse;
+                    break;
+
+                case "eql":
+                    variables[a] = Convert.ToInt32(variables[a] == valToUse);
+                    break;
+            }
         }
 
         public static void Solve()
         {
-            CreateFunction();
-            return;
+            var chunks = GetChunks();
+            chunks.Reverse();
 
-            string[] lines = File.ReadAllLines(@"Day24/input.txt");
+            //long modelNumber = DepthFirstSearch(chunks, 0, 0, 0, Int64.MinValue);
 
-            long maxVal = 100000000000000;
-            bool bSuccess = false;
-
-            Dictionary<string, long> variables = new()
+            HashSet<(long w, long z)> states = new();
+            states.Add((0, 0));
+            Dictionary<string, long> variables = new();
+            for (int i = 0; i < chunks.Count; i++)
             {
-                { "w", 0 },
-                { "x", 0 },
-                { "y", 0 },
-                { "z", 0 }
-            };
+                int idx = chunks.Count - 1 - i;
 
+                HashSet<(long w, long z)> sCopy = new(states);
+                states.Clear();
 
-            // read in the program
-
-            Stack<long> digits = new();
-            while (!bSuccess)
-            {
-                maxVal--;
-                Console.WriteLine("Checking {0}", maxVal);
-
-                // parse digits
-                digits.Clear();
-                long temp = maxVal;
-                for(int i = 0; i < 14; ++i) // we must always have 14 digits
+                foreach (var pair in sCopy)
                 {
-                    digits.Push(temp % 10);
-                    temp /= 10;
-                }
-
-                foreach (string l in lines)
-                {
-                    Match m = Regex.Match(l, @"(\w+) (\w) ([-a-z0-9]+)");
-
-                    if (m.Success)
+                    for (int w = 1; w <= 9; ++w)
                     {
-                        string op = m.Groups[1].ToString();
-                        string a = m.Groups[2].ToString();
-                        string b = m.Groups[3].ToString();
+                        // Try condition 1
+                        long zStart = 
 
-                        long intVal = 0;
-                        bool bVar = variables.ContainsKey(b);
-                        if (!bVar)
+                        variables["w"] = w;
+                        variables["x"] = 0;
+                        variables["y"] = 0;
+                        variables["z"] = pair.z;
+                        foreach (string l in chunks[i])
                         {
-                            intVal = Int64.Parse(b);
+                            DecodeLine(variables, l);
                         }
 
-                        switch (op)
+                        long mod = 26
+                         if (i >= 3 &&
+                            i < 13 &&
+                            ((variables["z"] < 26 &&
+                           variables["z"] > -26) ||)
                         {
-                            case "add":
-                                variables[a] += bVar ? variables[b] : intVal;
-                                break;
-
-                            case "mul":
-                                variables[a] *= bVar ? variables[b] : intVal;
-                                break;
-
-                            case "div":
-                                variables[a] /= bVar ? variables[b] : intVal;
-                                break;
-
-                            case "mod":
-                                variables[a] %= bVar ? variables[b] : intVal;
-                                break;
-
-                            case "eql":
-                                variables[a] = Convert.ToInt64(variables[a] == (bVar ? variables[b] : intVal));
-                                break;
+                            continue;
+                        }
+                        else
+                        {
+                            lock (states)
+                            {
+                                long newW = pair.w + w * (long)Math.Pow(10, i);
+                                states.Add((newW, variables["z"]));
+                            }
                         }
                     }
-                    else // read input
-                    {
-                        string varName = l.Last().ToString();
-                        variables[varName] = digits.Pop();
-                    }
                 }
-
-                // Check for success
-                bSuccess = variables["z"] == 0;
             }
 
-            Console.WriteLine("Largest valid number is {0}", maxVal);
+            long modelNumber = states.Where(x => x.z == 0).Max(x => x.w);
+
+            Console.WriteLine("Largest valid number is {0}", modelNumber);
+        }
+
+        private static long DepthFirstSearch(List<List<string>> chunks, int depth, long currentW, long currentZ, long currentBest)
+        {
+            if (currentW <= currentBest ||
+                depth > 13)
+            {
+                return currentBest;
+            }
+            for (int w = 9; w >= 1; --w)
+            {
+                long newW = currentW + w * (long)Math.Pow(10, 13 - depth);
+                Dictionary<string, long> variables = new();
+
+                variables["w"] = w;
+                variables["x"] = 0;
+                variables["y"] = 0;
+                variables["z"] = currentZ;
+                foreach (string l in chunks[depth])
+                {
+                    DecodeLine(variables, l);
+                }
+
+                if (depth == 13 &&
+                    variables["z"] == 0)
+                {
+                    return newW;
+                }
+                else if (depth >= 3 &&
+                    variables["z"] == 0)
+                {
+                    continue;
+                }
+                else
+                {
+                    long newPotential = DepthFirstSearch(chunks, depth + 1, newW, variables["z"], currentBest);
+                    if (newPotential > currentBest)
+                    {
+                        currentBest = newPotential;
+                    }
+                }
+            }
+
+            return currentBest;
+
         }
     }
 }
+
+// Last 4:
+// zStart = (zEnd - w - q) / (26 / d)
+// zEnd = zStart * (26 / d) + w + q
+// All others
