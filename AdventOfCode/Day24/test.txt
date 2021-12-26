@@ -18,7 +18,35 @@ mul y x
 add z y
 
 
+x = 0;
+y = 0;
+w = w;
+z = zStart
 
+x = x + zStart
+x = x % 26
+z = z / A
+x = x + B - w
+if (x == 0) 
+{
+    x = 0;
+}
+else
+{
+    x = 1;
+}
+
+if (x)
+{
+  z = z * 26
+  z = z + w + C
+  NOTE: to check if we enter this if statement we can check that (zEnd - w - C) % 26 == 0
+  since we know z here will always be a multiple of 26 after being multiplied by 26
+}
+// if we don't enter this if statement then the previous if statement left x as 0
+zStart % 26 + B - w == 0
+zStart % 26 == w - B
+therefore w-B must be between 0 and 26
 
 
 
