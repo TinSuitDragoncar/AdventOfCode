@@ -59,4 +59,5 @@ namespace AdventOfCode
             Console.WriteLine("Largest valid number is {0}", states.Max(x => x.w));
             Console.WriteLine("Smallest valid number is {0}", states.Min(x => x.w));
         }
+    }
 }
