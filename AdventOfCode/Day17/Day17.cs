@@ -12,14 +12,20 @@ namespace AdventOfCode
     {
         public static void Solve()
         {
-            string input = File.ReadLines(@"Day17/test.txt").First();
+            string input = File.ReadLines(@"Day17/input.txt").First();
 
             Match xM = Regex.Match(input, @"x=([0-9-]+)..([0-9-]+)");
             Match yM = Regex.Match(input, @"y=([0-9-]+)..([0-9-]+)");
             (int a, int b) xLims = (Int32.Parse(xM.Groups[1].ToString()), Int32.Parse(xM.Groups[2].ToString()));
             (int a, int b) yLims = (Int32.Parse(yM.Groups[2].ToString()), Int32.Parse(yM.Groups[1].ToString()));
 
-            int xMinStart = (int) Math.Sqrt(2 * xLims.a);
+            int xMinStart = 1;
+            HashSet<int> result = GetStepRange(xMinStart, xLims);
+            while (result.Count == 0)
+            {
+                xMinStart++;
+                result = GetStepRange(xMinStart, xLims);
+            }
             int xMaxStart = xLims.b;
 
             int yMinStart = yLims.b;
@@ -29,87 +35,84 @@ namespace AdventOfCode
 
             Console.WriteLine("Max height is {0}", maxHeight);
 
-            Dictionary<int, int> frequencyMap = new();
+            Dictionary<int, HashSet<int>> frequencyMap = new();
 
-            int xRange = xMaxStart - xMinStart;
-            int yRange = yMaxStart - yMinStart;
-
-            for (int i = 0; i < yRange; ++i)
+            for (int i = yMinStart; i <= yMaxStart; ++i)
             {
-                // solve s=ut + 0.5at^2
-                double a = -0.5;
-                double startVelocity = yMinStart + i;
-
-                int minSteps = (int) Math.Ceiling(QuadSolve(a, startVelocity, -yLims.a));
-                int maxSteps = (int)Math.Floor(QuadSolve(a, startVelocity, -yLims.b));
-
-                if (maxSteps < minSteps)
+                result = GetStepRange(i, yLims);
+                foreach(int step in result)
                 {
-                    maxSteps = minSteps;
-                }
-
-                for (int j = minSteps; j <= maxSteps; ++j)
-                {
-                    if (!frequencyMap.ContainsKey(j))
+                    if (!frequencyMap.ContainsKey(step))
                     {
-                        frequencyMap[j] = 0;
+                        frequencyMap[step] = new();
                     }
-                    frequencyMap[j]++;
+                    frequencyMap[step].Add(i);
                 }
             }
 
             int possibilities = 0;
 
-            for (int i = 0; i < xRange; ++i)
+            int maxSteps = frequencyMap.Keys.Max();
+
+            for (int i = xMinStart; i <= xMaxStart; ++i)
             {
-                // solve s=ut + 0.5at^2
-                double a = 0.5 * -1;
-                double startVelocity = xMinStart + i + 1;
-
-                int minSteps = (int)Math.Ceiling(QuadSolve(a, startVelocity, -xLims.a));
-                double temp = QuadSolve(a, startVelocity, -xLims.b);
-                int maxSteps;
-                if (Double.IsNaN(temp))
+                result = GetStepRange(i, xLims, maxSteps, true);
+                HashSet<int> possibleYCombos = new();
+                foreach (int step in result)
                 {
-                    maxSteps = frequencyMap.Max(o => o.Key);
-                }
-                else
-                {
-                    maxSteps = (int) temp;
-                }
-
-                if (maxSteps == Int32.MinValue)
-                {
-                    maxSteps = minSteps + 1000;
-                }
-                else if (maxSteps < minSteps)
-                {
-                    maxSteps = minSteps;
-                }
-
-                for (int j = minSteps; j <= maxSteps; ++j)
-                {
-                    if (frequencyMap.ContainsKey(j))
+                    if (frequencyMap.ContainsKey(step))
                     {
-                        possibilities += frequencyMap[j];
+                        possibleYCombos.UnionWith(frequencyMap[step]);
                     }
                 }
+                possibilities += possibleYCombos.Count;
             }
-
-            
 
             Console.WriteLine("{0} possible start trajectories", possibilities);
         }
 
-        private static double QuadSolve(double a, double b, double c)
+        private static HashSet<int> GetStepRange(int startVelocity, (int a, int b) lims, int stepLimit = 1000, bool bStopAtZero = false)
         {
-            double other = Math.Sqrt(b * b - 4 * a * c);
+            HashSet<int> stepsSet = new();
+            int vel = startVelocity;
+            int pos = vel;
+            int steps = 1;
 
-            double ret1 = (-b + other) / (2 * a);
-            double ret2 = (-b - other) / (2 * a);
+            if (lims.b > lims.a)
+            {
+                while (pos <= lims.b && steps <= stepLimit)
+                {
+                    if (pos >= lims.a &&
+                        pos <= lims.b)
+                    {
+                        stepsSet.Add(steps);
+                    }
 
-            // Only the pos result is valid here
-            return Math.Max(ret1, ret2);
+                    steps++;
+                    if (!(vel == 0 && bStopAtZero))
+                    {
+                        vel--;
+                    }
+                    pos += vel;
+                }
+            }
+            else
+            {
+                while (pos >= lims.b && steps < stepLimit)
+                {
+                    if (pos <= lims.a &&
+                        pos >= lims.b)
+                    {
+                        stepsSet.Add(steps);
+                    }
+
+                    steps++;
+                    vel--;
+                    pos += vel;
+                }
+            }
+
+            return stepsSet;
         }
     }
 }
