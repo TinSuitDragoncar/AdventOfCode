@@ -26,6 +26,20 @@ namespace AdventOfCode
             Console.WriteLine("Magnitude is: {0}", magnitude);
 
             // Part 2
+            int maxMagnitude = Int32.MinValue;
+            foreach(string a in snailNumbers)
+            {
+                foreach(string b in snailNumbers)
+                {
+                    if (a != b)
+                    {
+                        string result = AddSnailNumbers(a, b);
+                        maxMagnitude = Math.Max(maxMagnitude, FindMagnitude(result));
+                    }
+                }
+            }
+
+            Console.WriteLine("Part 2 Result is {0}", maxMagnitude);
         }
 
         private static int FindMagnitude(string s)
@@ -87,7 +101,6 @@ namespace AdventOfCode
         private static string AddSnailNumbers(string a, string b)
         {
             a = String.Format("[{0},{1}]", a, b);
-            Console.WriteLine("Reducing {0}", a);
             while (Reduce(a, out string result))
             {
                 a = result;
