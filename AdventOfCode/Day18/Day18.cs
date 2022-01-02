@@ -23,6 +23,32 @@ namespace AdventOfCode
             Console.WriteLine("Result is:\n{0}", currentNumber);
         }
 
+        public class Node
+        {
+            public object Data { get; init; }
+            public Node A { get; set; }
+            public Node B { get; set; }
+            public Node(object data)
+            {
+                Data = data;
+                A = null;
+                B = null;
+            }
+        }
+
+
+        private static Node ConvertToTree(string s)
+        {
+            Node n = new();
+            n.A = new();
+            n.B = new();
+            Match m = Regex.Match(s, @"^\[(\d+),(\d+)\]$");
+            if (m.Success)
+            {
+                
+            }
+        }
+
         private static string AddSnailNumbers(string a, string b)
         {
             a = String.Format("[{0},{1}]", a, b);
